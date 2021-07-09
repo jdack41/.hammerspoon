@@ -1,8 +1,8 @@
 -- HANDLE SCROLLING WITH MOUSE BUTTON PRESSED
 local scrollVerticalButton = 4
+local scrollHorizontalButton = 3
 local toggleVerticalScrollButton = 4
 local toggleHorizontalScrollButton = 3
-local scrollHorizontalButton = 999 -- disabled
 local deferred = false
 local verticalScrollToggle = false
 local horizontalScrollToggle = false
@@ -126,6 +126,7 @@ DragOtherToScroll = hs.eventtap.new({hs.eventtap.event.types.otherMouseDragged},
                                                             'pixel')
             -- put the mouse back
             hs.mouse.absolutePosition(oldmousepos)
+            horizontalScrollToggle = false
             return true, {scroll}
         else
             return false, {}
