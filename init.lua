@@ -1,4 +1,3 @@
--- HANDLE SCROLLING WITH MOUSE BUTTON PRESSED
 local scrollVerticalButton = 4
 local scrollHorizontalButton = 3
 local toggleVerticalScrollButton = 4
@@ -65,34 +64,32 @@ OverrideOtherMouseUp = hs.eventtap.new({hs.eventtap.event.types.otherMouseUp},
     return false
 end)
 
-local scrollmult = -2 -- negative multiplier makes mouse work like traditional scrollwheel
+local scrollmult = -1 -- negative multiplier makes mouse work like traditional scrollwheel
 local scrollmultHorizontal = -1
 local moveX = 0
 local moveY = 0
+
+local function scrollFunction(x, y)
+    local oldmousepos = hs.mouse.absolutePosition()
+    local scroll = hs.eventtap.event.newScrollEvent({x, y}, {}, 'pixel')
+    hs.mouse.absolutePosition(oldmousepos)
+    return scroll
+end
 
 ToggleMouseButtonThenScroll = hs.eventtap.new({
     hs.eventtap.event.types.mouseMoved
 }, function(e)
     if verticalScrollToggle then
-        local oldmousepos = hs.mouse.absolutePosition()
         local dy = e:getProperty(
                        hs.eventtap.event.properties['mouseEventDeltaY'])
         moveY = -dy * scrollmult
-        local scroll = hs.eventtap.event.newScrollEvent({0, moveY}, {}, 'pixel')
-        -- put the mouse back
-        hs.mouse.absolutePosition(oldmousepos)
-        return true, {scroll}
+        return true, {scrollFunction(0, moveY)}
     else
         if horizontalScrollToggle then
-            local oldmousepos = hs.mouse.absolutePosition()
             local dx = e:getProperty(
                            hs.eventtap.event.properties['mouseEventDeltaX'])
             moveX = -dx * scrollmultHorizontal
-            local scroll = hs.eventtap.event.newScrollEvent({moveX, 0}, {},
-                                                            'pixel')
-            -- put the mouse back
-            hs.mouse.absolutePosition(oldmousepos)
-            return true, {scroll}
+            return true, {scrollFunction(moveX, 0)}
         else
             return false, {}
         end
@@ -105,29 +102,20 @@ DragOtherToScroll = hs.eventtap.new({hs.eventtap.event.types.otherMouseDragged},
                                    hs.eventtap.event.properties['mouseEventButtonNumber'])
     if scrollVerticalButton == pressedMouseButton then
         deferred = false
-        local oldmousepos = hs.mouse.absolutePosition()
         local dy = e:getProperty(
                        hs.eventtap.event.properties['mouseEventDeltaY'])
         moveY = -dy * scrollmult
-        local scroll = hs.eventtap.event.newScrollEvent({0, moveY}, {}, 'pixel')
-        -- put the mouse back
-        hs.mouse.absolutePosition(oldmousepos)
         verticalScrollToggle = false
-        return true, {scroll}
+        return true, {scrollFunction(0, moveY)}
 
     else
         if scrollHorizontalButton == pressedMouseButton then
             deferred = false
-            local oldmousepos = hs.mouse.absolutePosition()
             local dx = e:getProperty(
                            hs.eventtap.event.properties['mouseEventDeltaX'])
             moveX = -dx * scrollmultHorizontal
-            local scroll = hs.eventtap.event.newScrollEvent({moveX, 0}, {},
-                                                            'pixel')
-            -- put the mouse back
-            hs.mouse.absolutePosition(oldmousepos)
             horizontalScrollToggle = false
-            return true, {scroll}
+            return true, {scrollFunction(moveX, 0)}
         else
             return false, {}
         end
